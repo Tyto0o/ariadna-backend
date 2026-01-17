@@ -1,9 +1,9 @@
 import { Router } from 'express';
-import healthRoutes from './healthRoutes';
+import robotRoutes from './robotRoutes';
 
 const router: Router = Router();
 
-// Register all routes
-router.use(healthRoutes);
+// All routes
+router.use(robotRoutes);
 
 export default router;

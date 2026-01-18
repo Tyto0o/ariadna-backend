@@ -1,6 +1,6 @@
 import { Schema, model, Document } from 'mongoose';
 
-interface IRobot extends Document {
+export interface IRobot extends Document {
   name: string;
   position: {
     x: number;

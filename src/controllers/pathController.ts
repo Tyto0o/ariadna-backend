@@ -28,7 +28,7 @@ export const calculatePath = async (
       return;
     }
 
-    const path: { x: number; y: number }[] | null = findPath(
+    const path: { x: number; y: number }[] | null = await findPath(
       robot.position,
       target
     );

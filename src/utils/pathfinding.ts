@@ -1,19 +1,10 @@
 import Graph from 'node-dijkstra';
+import Obstacle, { IObstacle } from '../models/Obstacle';
 
 interface Point {
   x: number;
   y: number;
 }
-
-interface Obstacle {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-}
-
-// Demo obstacles; later - these would be dynamically set
-export const OBSTACLES: Obstacle[] = [];
 
 const GRID_STEP: number = 10; // The distance between nodes in the grid
 const OBSTACLE_SAFETY_BUFFER: number = 20; // Safety buffer around obstacles
@@ -24,14 +15,15 @@ let cachedGraph: Graph | null = null;
 let cachedMaxX: number = 0;
 let cachedMaxY: number = 0;
 let cachedObstaclesHash: string = '';
+let cachedObstacles: IObstacle[] = [];
 
-const isCollision = (x: number, y: number): boolean => {
-  return OBSTACLES.some((obs) => {
+const isCollision = (x: number, y: number, obstacles: IObstacle[]): boolean => {
+  return obstacles.some((obs) => {
     return (
-      x >= obs.x - OBSTACLE_SAFETY_BUFFER &&
-      x <= obs.x + obs.width + OBSTACLE_SAFETY_BUFFER &&
-      y >= obs.y - OBSTACLE_SAFETY_BUFFER &&
-      y <= obs.y + obs.height + OBSTACLE_SAFETY_BUFFER
+      x >= obs.position.x - OBSTACLE_SAFETY_BUFFER &&
+      x <= obs.position.x + obs.width + OBSTACLE_SAFETY_BUFFER &&
+      y >= obs.position.y - OBSTACLE_SAFETY_BUFFER &&
+      y <= obs.position.y + obs.length + OBSTACLE_SAFETY_BUFFER
     );
   });
 };
@@ -40,7 +32,11 @@ const snapToGrid = (value: number): number => {
   return Math.round(value / GRID_STEP) * GRID_STEP;
 };
 
-const buildGraph = (maxX: number, maxY: number): Graph => {
+const buildGraph = (
+  maxX: number,
+  maxY: number,
+  obstacles: IObstacle[]
+): Graph => {
   const graph: Graph = new Graph();
   const directions = [
     { x: 0, y: GRID_STEP },
@@ -55,7 +51,7 @@ const buildGraph = (maxX: number, maxY: number): Graph => {
 
   for (let x = 0; x <= maxX; x += GRID_STEP) {
     for (let y = 0; y <= maxY; y += GRID_STEP) {
-      if (isCollision(x, y)) continue;
+      if (isCollision(x, y, obstacles)) continue;
 
       const nodeId: string = `${x},${y}`;
       const neighbors: Record<string, number> = {};
@@ -69,7 +65,7 @@ const buildGraph = (maxX: number, maxY: number): Graph => {
           nx <= maxX &&
           ny >= 0 &&
           ny <= maxY &&
-          !isCollision(nx, ny)
+          !isCollision(nx, ny, obstacles)
         ) {
           const cost: number = dir.x !== 0 && dir.y !== 0 ? Math.SQRT2 : 1;
           neighbors[`${nx},${ny}`] = cost;
@@ -113,7 +109,50 @@ const simplifyPath = (path: Point[]): Point[] => {
   return simplified;
 };
 
-export const findPath = (start: Point, target: Point): Point[] | null => {
+const initializeObstacleCache = async (): Promise<void> => {
+  try {
+    cachedObstacles = await Obstacle.find();
+  } catch (error) {
+    console.error('Failed to initialize obstacle cache:', error);
+    cachedObstacles = [];
+  }
+};
+
+export const addObstacleToCache = (obstacle: IObstacle): void => {
+  cachedObstacles.push(obstacle);
+  cachedGraph = null;
+  cachedObstaclesHash = '';
+  cachedMaxX = 0;
+  cachedMaxY = 0;
+};
+
+export const removeObstacleFromCache = (obstacleId: string): void => {
+  cachedObstacles = cachedObstacles.filter(
+    (obs) => obs._id?.toString() !== obstacleId
+  );
+  cachedGraph = null;
+  cachedObstaclesHash = '';
+  cachedMaxX = 0;
+  cachedMaxY = 0;
+};
+
+export const updateObstacleInCache = (updatedObstacle: IObstacle): void => {
+  const index = cachedObstacles.findIndex(
+    (obs) => obs._id?.toString() === updatedObstacle._id?.toString()
+  );
+  if (index !== -1) {
+    cachedObstacles[index] = updatedObstacle;
+    cachedGraph = null;
+    cachedObstaclesHash = '';
+    cachedMaxX = 0;
+    cachedMaxY = 0;
+  }
+};
+
+export const findPath = async (
+  start: Point,
+  target: Point
+): Promise<Point[] | null> => {
   const snappedStart: Point = {
     x: snapToGrid(start.x),
     y: snapToGrid(start.y),
@@ -127,17 +166,17 @@ export const findPath = (start: Point, target: Point): Point[] | null => {
     Math.max(
       snappedStart.x,
       snappedTarget.x,
-      ...OBSTACLES.map((o) => o.x + o.width)
+      ...cachedObstacles.map((o) => o.position.x + o.width)
     ) + WORKSPACE_MARGIN;
   const maxY: number =
     Math.max(
       snappedStart.y,
       snappedTarget.y,
-      ...OBSTACLES.map((o) => o.y + o.height)
+      ...cachedObstacles.map((o) => o.position.y + o.length)
     ) + WORKSPACE_MARGIN;
 
   // Check if we can reuse cached graph
-  const obstaclesHash: string = JSON.stringify(OBSTACLES);
+  const obstaclesHash: string = JSON.stringify(cachedObstacles);
   let graph: Graph;
 
   if (
@@ -148,7 +187,7 @@ export const findPath = (start: Point, target: Point): Point[] | null => {
   ) {
     graph = cachedGraph;
   } else {
-    graph = buildGraph(maxX, maxY);
+    graph = buildGraph(maxX, maxY, cachedObstacles);
     cachedGraph = graph;
     cachedMaxX = maxX;
     cachedMaxY = maxY;
@@ -169,3 +208,5 @@ export const findPath = (start: Point, target: Point): Point[] | null => {
 
   return simplifyPath(fullPath);
 };
+
+initializeObstacleCache();

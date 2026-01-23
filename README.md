@@ -1,6 +1,29 @@
 # Ariadna 3D - Backend Engine 🚀
 
-The Ariadna 3D Backend is the core computational hub of the system. It is responsible for spatial data management, business logic, and calculating optimal paths for autonomous robots.
+<div align="center">
+
+![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
+![Node](https://img.shields.io/badge/node-%3E%3D20.0.0-brightgreen.svg)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue.svg)
+![License](https://img.shields.io/badge/license-ISC-green.svg)
+
+**Advanced pathfinding and spatial management system for autonomous warehouse robots**
+
+[Features](#-key-features) •
+[Quick Start](#-quick-start) •
+[API Docs](#-api-documentation) •
+[Architecture](#-architecture-overview) •
+[Development](#-development)
+
+</div>
+
+---
+
+## 📋 Overview
+
+Ariadna 3D Backend is a high-performance computational engine designed for autonomous warehouse robotics systems. It provides real-time pathfinding, obstacle management, and robot fleet coordination through a RESTful API architecture.
+
+The system implements Dijkstra's algorithm for guaranteed shortest-path routing while maintaining persistent spatial data for dynamic warehouse environments.
 
 ## 🧠 Key Features
 
@@ -12,20 +35,27 @@ The Ariadna 3D Backend is the core computational hub of the system. It is respon
 
 ## 🛠 Tech Stack
 
-- **Runtime**: Node.js with TypeScript
-- **Framework**: Express.js
-- **Database**: MongoDB
-- **Containerization**: Docker & Docker Compose
-- **Documentation**: Swagger/OpenAPI
-- **Algorithms**: Dijkstra's shortest path algorithm with adjacency list representation of the warehouse grid.
+| Category             | Technology                           | Version |
+| -------------------- | ------------------------------------ | ------- |
+| **Runtime**          | Node.js                              | v20+    |
+| **Language**         | TypeScript                           | 5.9.3   |
+| **Framework**        | Express.js                           | 4.18.2  |
+| **Database**         | MongoDB                              | 7.0     |
+| **ODM**              | Mongoose                             | 8.0.3   |
+| **Documentation**    | Swagger/OpenAPI                      | -       |
+| **Containerization** | Docker & Docker Compose              | -       |
+| **Algorithm**        | node-dijkstra                        | 2.5.1   |
+| **Dev Tools**        | ts-node-dev, ESLint, Prettier, Husky | -       |
 
 ## 🚀 Quick Start
 
 ### Prerequisites
 
-- Node.js (v20 or higher)
-- Docker & Docker Compose
-- npm or yarn
+Before you begin, ensure you have the following installed:
+
+- **Node.js** v20.0.0 or higher ([Download](https://nodejs.org/))
+- **Docker** & **Docker Compose** ([Download](https://www.docker.com/))
+- **npm** or **yarn** package manager
 
 ### Installation
 
@@ -47,8 +77,8 @@ npm install
 Create a `.env` file in the root directory:
 
 ```env
-PORT='8000'
-MONGO_URL='mongodb://localhost:27017/ariadna'
+PORT=8000
+MONGO_URL=mongodb://localhost:27017/ariadna
 ```
 
 ### Running the Application
@@ -93,60 +123,95 @@ Once the server is running, access the interactive API documentation:
 
 ### Available Endpoints
 
-- `GET /api/health` - Health check endpoint
+#### 🤖 Robot Management
+
+| Method   | Endpoint          | Description        |
+| -------- | ----------------- | ------------------ |
+| `GET`    | `/api/robots`     | Get all robots     |
+| `POST`   | `/api/robots`     | Create a new robot |
+| `PUT`    | `/api/robots/:id` | Update robot by ID |
+| `DELETE` | `/api/robots/:id` | Delete robot by ID |
+
+#### 🚧 Obstacle Management
+
+| Method   | Endpoint             | Description           |
+| -------- | -------------------- | --------------------- |
+| `GET`    | `/api/obstacles`     | Get all obstacles     |
+| `POST`   | `/api/obstacles`     | Create a new obstacle |
+| `PUT`    | `/api/obstacles/:id` | Update obstacle by ID |
+| `DELETE` | `/api/obstacles/:id` | Delete obstacle by ID |
+
+#### 🗺️ Pathfinding
+
+| Method | Endpoint    | Description                        |
+| ------ | ----------- | ---------------------------------- |
+| `POST` | `/api/path` | Calculate optimal path for a robot |
 
 ## 📁 Project Structure
 
 ```
 ariadna-backend/
 ├── src/
-│   ├── config/
-│   │   ├── constants.ts    # Application constants
-│   │   ├── mongo.ts        # MongoDB connection setup
-│   │   ├── swagger.ts      # Swagger/OpenAPI configuration
-│   │   └── middleware.ts   # Express middleware setup
-│   ├── routes/
-│   │   ├── routes.ts       # Main router (aggregates all routes)
-│   │   └── healthRoutes.ts # Health check routes
-│   ├── app.ts              # Express instance with middleware and routes
-│   └── server.ts           # Server startup and database connection
-├── .husky/
-│   └── pre-commit          # Pre-commit hook
-├── .env                    # Environment variables (create this)
-├── eslint.config.js        # ESLint configuration
-├── .eslintignore           # ESLint ignore patterns
-├── .prettierrc             # Prettier configuration
-├── .prettierignore         # Prettier ignore patterns
-├── .gitignore
-├── docker-compose.yml      # Docker services configuration
-├── Dockerfile              # Application container
-├── package.json
-├── tsconfig.json           # TypeScript configuration
-└── README.md
+│   ├── config/                 # Configuration files
+│   │   ├── constants.ts        # Application constants and workspace bounds
+│   │   ├── mongo.ts            # MongoDB connection setup
+│   │   ├── swagger.ts          # Swagger/OpenAPI configuration
+│   │   └── middleware.ts       # Express middleware setup (CORS, JSON parsing)
+│   ├── controllers/            # Request handlers
+│   │   ├── robotController.ts      # Robot CRUD operations
+│   │   ├── pathController.ts       # Pathfinding logic
+│   │   └── obstacleController.ts   # Obstacle management
+│   ├── models/                 # MongoDB schemas
+│   │   ├── Robot.ts            # Robot model (name, position, status)
+│   │   └── Obstacle.ts         # Obstacle model (position, size, type)
+│   ├── routes/                 # API route definitions
+│   │   ├── routes.ts           # Main router (aggregates all routes)
+│   │   ├── robotRoutes.ts      # Robot endpoints with Swagger docs
+│   │   ├── pathRoutes.ts       # Pathfinding endpoints
+│   │   └── obstacleRoutes.ts   # Obstacle endpoints
+│   ├── utils/                  # Utility functions
+│   │   └── pathfinding.ts      # Dijkstra's algorithm implementation
+│   ├── app.ts                  # Express app setup (middleware, routes, Swagger)
+│   └── server.ts               # Server initialization and DB connection
+├── .husky/                     # Git hooks
+│   └── pre-commit              # Pre-commit quality checks
+├── .env.example                # Environment variables template
+├── eslint.config.js            # ESLint configuration
+├── .prettierrc                 # Prettier configuration
+├── .gitignore                  # Git ignore patterns
+├── docker-compose.yml          # Docker services configuration
+├── Dockerfile                  # Application container definition
+├── package.json                # Dependencies and scripts
+├── tsconfig.json               # TypeScript configuration
+└── README.md                   # Project documentation
 ```
 
-### Architecture Overview
+## Architecture Overview
 
-The project follows a modular architecture with clear separation of concerns:
+The project follows a **modular, layered architecture** with clear separation of concerns:
 
-- **config/** - Configuration files for database, API documentation, middleware, and environment variables
-- **routes/** - Route handlers organized by feature/domain
-- **app.ts** - Express application setup (middleware, routes, Swagger)
-- **server.ts** - Server initialization and database connection
+## Available Scripts
 
-This structure makes the codebase:
+| Script           | Command                | Description                                           |
+| ---------------- | ---------------------- | ----------------------------------------------------- |
+| **Development**  | `npm run dev`          | Start dev server with hot-reload (ts-node-dev)        |
+| **Build**        | `npm run build`        | Compile TypeScript to JavaScript                      |
+| **Production**   | `npm start`            | Run production build (requires `npm run build` first) |
+| **Linting**      | `npm run lint`         | Check code for errors with ESLint                     |
+| **Lint Fix**     | `npm run lint:fix`     | Auto-fix ESLint errors                                |
+| **Format**       | `npm run format`       | Format code with Prettier                             |
+| **Format Check** | `npm run format:check` | Check code formatting without changes                 |
+| **Prepare**      | `npm run prepare`      | Setup Husky git hooks (runs automatically)            |
 
-- ✅ Easy to navigate and understand
-- ✅ Simple to add new features
-- ✅ Highly maintainable and testable
-- ✅ Scalable for larger applications
+## 🐳 Docker Management
 
-````
-
-## 🐳 Docker Commands
+### Docker Compose Commands
 
 ```bash
 # Start all services
+docker-compose up
+
+# Start in detached mode (background)
 docker-compose up -d
 
 # Start only MongoDB
@@ -155,15 +220,16 @@ docker-compose up -d mongodb
 # Stop all services
 docker-compose down
 
-# View logs
+# Stop and remove volumes
+docker-compose down -v
+
+# View logs (all services)
 docker-compose logs -f
 
-# View MongoDB logs
-docker-compose logs -f mongodb
 
 # Rebuild containers
 docker-compose up --build
-````
+```
 
 ## 📝 Environment Variables
 

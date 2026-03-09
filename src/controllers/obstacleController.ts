@@ -56,7 +56,7 @@ export const deleteObstacle = async (
   }
 };
 
-export const updateObstacle = async (
+export const patchObstacle = async (
   req: Request,
   res: Response
 ): Promise<void> => {
@@ -75,6 +75,50 @@ export const updateObstacle = async (
   } catch (error) {
     const message =
       error instanceof Error ? error.message : 'Failed to update obstacle';
+    res.status(400).json({ error: message });
+  }
+};
+
+export const putObstacle = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const { name, position, width, length } = req.body;
+
+    if (
+      !name ||
+      !position ||
+      position.x === undefined ||
+      position.y === undefined ||
+      !width ||
+      !length
+    ) {
+      res.status(400).json({
+        error: 'PUT requires all fields: name, position (x, y), width, length',
+      });
+      return;
+    }
+
+    const obstacle = await Obstacle.findByIdAndUpdate(
+      id,
+      { name, position, width, length },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+
+    if (!obstacle) {
+      res.status(404).json({ error: 'Obstacle not found' });
+      return;
+    }
+    updateObstacleInCache(obstacle);
+    res.json(obstacle);
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : 'Failed to put obstacle';
     res.status(400).json({ error: message });
   }
 };

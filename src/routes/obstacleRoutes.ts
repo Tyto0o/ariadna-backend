@@ -3,7 +3,8 @@ import {
   getObstacles,
   createObstacle,
   deleteObstacle,
-  updateObstacle,
+  patchObstacle,
+  putObstacle,
 } from '../controllers/obstacleController';
 
 const router: Router = Router();
@@ -152,7 +153,86 @@ const router: Router = Router();
  *                 error:
  *                   type: string
  *   put:
- *     summary: Update an obstacle
+ *     summary: Replace an obstacle (full update)
+ *     description: Replaces the entire obstacle resource. All required fields must be provided.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Obstacle ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - position
+ *               - width
+ *               - length
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: Name of the obstacle
+ *               position:
+ *                 type: object
+ *                 required:
+ *                   - x
+ *                   - y
+ *                 description: Position of the obstacle's corner (starting point)
+ *                 properties:
+ *                   x:
+ *                     type: number
+ *                     description: X coordinate of the obstacle's corner
+ *                   y:
+ *                     type: number
+ *                     description: Y coordinate of the obstacle's corner
+ *               width:
+ *                 type: number
+ *                 description: Width of the obstacle along the X axis
+ *               length:
+ *                 type: number
+ *                 description: Length of the obstacle along the Y axis
+ *     responses:
+ *       200:
+ *         description: Obstacle replaced successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *       400:
+ *         description: Bad request - Validation error or missing required fields
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *       404:
+ *         description: Obstacle not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *   patch:
+ *     summary: Partially update an obstacle
+ *     description: Updates only the provided fields. All fields are optional.
  *     parameters:
  *       - in: path
  *         name: id
@@ -222,6 +302,10 @@ const router: Router = Router();
  *                   type: string
  */
 router.route('/obstacles').get(getObstacles).post(createObstacle);
-router.route('/obstacles/:id').put(updateObstacle).delete(deleteObstacle);
+router
+  .route('/obstacles/:id')
+  .put(putObstacle)
+  .patch(patchObstacle)
+  .delete(deleteObstacle);
 
 export default router;

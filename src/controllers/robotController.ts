@@ -46,7 +46,7 @@ export const deleteRobot = async (
   }
 };
 
-export const updateRobot = async (
+export const patchRobot = async (
   req: Request,
   res: Response
 ): Promise<void> => {
@@ -64,6 +64,44 @@ export const updateRobot = async (
   } catch (error) {
     const message =
       error instanceof Error ? error.message : 'Failed to update robot';
+    res.status(400).json({ error: message });
+  }
+};
+
+export const putRobot = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const { name, position } = req.body;
+
+    if (
+      !name ||
+      !position ||
+      position.x === undefined ||
+      position.y === undefined
+    ) {
+      res.status(400).json({
+        error: 'PUT requires all fields: name, position (x, y)',
+      });
+      return;
+    }
+
+    const robot = await Robot.findByIdAndUpdate(
+      id,
+      { name, position },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+
+    if (!robot) {
+      res.status(404).json({ error: 'Robot not found' });
+      return;
+    }
+    res.json(robot);
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : 'Failed to put robot';
     res.status(400).json({ error: message });
   }
 };

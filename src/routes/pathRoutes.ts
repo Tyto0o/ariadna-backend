@@ -121,6 +121,7 @@ const router: Router = Router();
  *                   type: string
  *                   example: "Internal server error"
  */
+
 router.post('/path', calculatePath);
 
 export default router;

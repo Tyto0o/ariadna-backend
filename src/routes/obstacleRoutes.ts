@@ -32,14 +32,14 @@ const router: Router = Router();
  *                     description: Name of the obstacle
  *                   position:
  *                     type: object
- *                     description: Position of the obstacle's corner (starting point)
+ *                     description: Position of the obstacle's center point
  *                     properties:
  *                       x:
  *                         type: number
- *                         description: X coordinate of the obstacle's corner
+ *                         description: X coordinate of the obstacle's center
  *                       y:
  *                         type: number
- *                         description: Y coordinate of the obstacle's corner
+ *                         description: Y coordinate of the obstacle's center
  *                   width:
  *                     type: number
  *                     description: Width of the obstacle along the X axis
@@ -75,14 +75,14 @@ const router: Router = Router();
  *                 description: Name of the obstacle
  *               position:
  *                 type: object
- *                 description: Position of the obstacle's corner (starting point)
+ *                 description: Position of the obstacle's center point
  *                 properties:
  *                   x:
  *                     type: number
- *                     description: X coordinate of the obstacle's corner
+ *                     description: X coordinate of the obstacle's center
  *                   y:
  *                     type: number
- *                     description: Y coordinate of the obstacle's corner
+ *                     description: Y coordinate of the obstacle's center
  *               width:
  *                 type: number
  *                 description: Width of the obstacle along the X axis
@@ -182,14 +182,14 @@ const router: Router = Router();
  *                 required:
  *                   - x
  *                   - y
- *                 description: Position of the obstacle's corner (starting point)
+ *                 description: Position of the obstacle's center point
  *                 properties:
  *                   x:
  *                     type: number
- *                     description: X coordinate of the obstacle's corner
+ *                     description: X coordinate of the obstacle's center
  *                   y:
  *                     type: number
- *                     description: Y coordinate of the obstacle's corner
+ *                     description: Y coordinate of the obstacle's center
  *               width:
  *                 type: number
  *                 description: Width of the obstacle along the X axis
@@ -252,14 +252,14 @@ const router: Router = Router();
  *                 description: Name of the obstacle
  *               position:
  *                 type: object
- *                 description: Position of the obstacle's corner (starting point)
+ *                 description: Position of the obstacle's center point
  *                 properties:
  *                   x:
  *                     type: number
- *                     description: X coordinate of the obstacle's corner
+ *                     description: X coordinate of the obstacle's center
  *                   y:
  *                     type: number
- *                     description: Y coordinate of the obstacle's corner
+ *                     description: Y coordinate of the obstacle's center
  *               width:
  *                 type: number
  *                 description: Width of the obstacle along the X axis

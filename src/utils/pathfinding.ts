@@ -19,11 +19,14 @@ let cachedObstacles: IObstacle[] = [];
 
 const isCollision = (x: number, y: number, obstacles: IObstacle[]): boolean => {
   return obstacles.some((obs) => {
+    const halfWidth = obs.width / 2;
+    const halfLength = obs.length / 2;
+
     return (
-      x >= obs.position.x - OBSTACLE_SAFETY_BUFFER &&
-      x <= obs.position.x + obs.width + OBSTACLE_SAFETY_BUFFER &&
-      y >= obs.position.y - OBSTACLE_SAFETY_BUFFER &&
-      y <= obs.position.y + obs.length + OBSTACLE_SAFETY_BUFFER
+      x >= obs.position.x - halfWidth - OBSTACLE_SAFETY_BUFFER &&
+      x <= obs.position.x + halfWidth + OBSTACLE_SAFETY_BUFFER &&
+      y >= obs.position.y - halfLength - OBSTACLE_SAFETY_BUFFER &&
+      y <= obs.position.y + halfLength + OBSTACLE_SAFETY_BUFFER
     );
   });
 };
@@ -166,13 +169,13 @@ export const findPath = async (
     Math.max(
       snappedStart.x,
       snappedTarget.x,
-      ...cachedObstacles.map((o) => o.position.x + o.width)
+      ...cachedObstacles.map((o) => o.position.x + o.width / 2)
     ) + WORKSPACE_MARGIN;
   const maxY: number =
     Math.max(
       snappedStart.y,
       snappedTarget.y,
-      ...cachedObstacles.map((o) => o.position.y + o.length)
+      ...cachedObstacles.map((o) => o.position.y + o.length / 2)
     ) + WORKSPACE_MARGIN;
 
   // Check if we can reuse cached graph

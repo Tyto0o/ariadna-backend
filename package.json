@@ -22,7 +22,8 @@
     "mongoose": "^8.0.3",
     "node-dijkstra": "^2.5.1",
     "swagger-jsdoc": "^6.2.8",
-    "swagger-ui-express": "^5.0.0"
+    "swagger-ui-express": "^5.0.0",
+    "ws": "^8.19.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",
@@ -31,6 +32,7 @@
     "@types/node-dijkstra": "^2.5.6",
     "@types/swagger-jsdoc": "^6.0.4",
     "@types/swagger-ui-express": "^4.1.6",
+    "@types/ws": "^8.18.1",
     "@typescript-eslint/eslint-plugin": "^8.20.0",
     "@typescript-eslint/parser": "^8.20.0",
     "eslint": "^9.17.0",

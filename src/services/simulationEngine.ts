@@ -1,3 +1,5 @@
+import Robot from '../models/Robot';
+
 export type Point = {
   x: number;
   y: number;
@@ -33,11 +35,21 @@ export const setSimulationPublisher = (publisher: Publisher): void => {
 };
 
 const emitPosition = (robotId: string, point: Point): void => {
-  publish({
+  const msg: SimulationPositionMessage = {
     robotId,
     x: point.x,
     y: point.y,
-  });
+  };
+
+  publish(msg);
+
+  void Robot.findByIdAndUpdate(robotId, {
+    position: { x: msg.x, y: msg.y },
+  })
+    .exec()
+    .catch((err) => {
+      console.error('Failed to update robot position in database:', err);
+    });
 };
 
 export const startSimulation = (path: Point[], robotId: string): void => {

@@ -1,12 +1,6 @@
-import { Schema, model, Document } from 'mongoose';
+import { Schema, model } from 'mongoose';
 
-export interface IRobot extends Document {
-  name: string;
-  position: {
-    x: number;
-    y: number;
-  };
-}
+import type { IRobot } from '../types';
 
 const robotSchema = new Schema<IRobot>(
   {

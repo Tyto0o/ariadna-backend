@@ -1,10 +1,6 @@
 import Graph from 'node-dijkstra';
-import Obstacle, { IObstacle } from '../models/Obstacle';
-
-interface Point {
-  x: number;
-  y: number;
-}
+import Obstacle from '../models/Obstacle';
+import type { IObstacle, Point } from '../types';
 
 const GRID_STEP: number = 10; // The distance between nodes in the grid
 const OBSTACLE_SAFETY_BUFFER: number = 20; // Safety buffer around obstacles

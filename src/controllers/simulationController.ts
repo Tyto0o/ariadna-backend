@@ -2,26 +2,30 @@ import { Request, Response } from 'express';
 import {
   startSimulation,
   SPEED_PX_PER_SEC,
-  Point,
 } from '../services/simulationEngine';
+import type { Point } from '../types';
 
 const MAX_COORDINATE_MAGNITUDE: number = 1000000;
 
 const isValidPoint = (point: unknown): point is Point => {
   if (!point || typeof point !== 'object') return false;
   const candidate = point as { x?: unknown; y?: unknown };
+
   if (typeof candidate.x !== 'number' || typeof candidate.y !== 'number') {
     return false;
   }
+
   if (!Number.isFinite(candidate.x) || !Number.isFinite(candidate.y)) {
     return false;
   }
+
   if (
     Math.abs(candidate.x) > MAX_COORDINATE_MAGNITUDE ||
     Math.abs(candidate.y) > MAX_COORDINATE_MAGNITUDE
   ) {
     return false;
   }
+
   return true;
 };
 

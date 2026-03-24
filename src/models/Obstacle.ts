@@ -1,14 +1,6 @@
-import { Schema, model, Document } from 'mongoose';
+import { Schema, model } from 'mongoose';
 
-export interface IObstacle extends Document {
-  name: string;
-  position: {
-    x: number;
-    y: number;
-  };
-  width: number;
-  length: number;
-}
+import type { IObstacle } from '../types';
 
 const obstacleSchema = new Schema<IObstacle>(
   {

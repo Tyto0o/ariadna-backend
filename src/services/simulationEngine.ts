@@ -1,17 +1,5 @@
 import Robot from '../models/Robot';
-
-export type Point = {
-  x: number;
-  y: number;
-};
-
-type SimulationPositionMessage = {
-  robotId: string;
-  x: number;
-  y: number;
-};
-
-type Publisher = (position: SimulationPositionMessage) => void;
+import type { Point, Publisher, SimulationPositionMessage } from '../types';
 
 let publish: Publisher = () => {};
 let activeTimer: ReturnType<typeof setInterval> | null = null;

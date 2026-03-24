@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
-import Robot, { IRobot } from '../models/Robot';
+import Robot from '../models/Robot';
+import type { IRobot, Point } from '../types';
 import { findPath } from '../utils/pathfinding';
 
 export const calculatePath = async (
@@ -7,10 +8,7 @@ export const calculatePath = async (
   res: Response
 ): Promise<void> => {
   try {
-    const {
-      robotId,
-      target,
-    }: { robotId: string; target: { x: number; y: number } } = req.body;
+    const { robotId, target }: { robotId: string; target: Point } = req.body;
 
     if (
       !robotId ||
@@ -28,10 +26,7 @@ export const calculatePath = async (
       return;
     }
 
-    const path: { x: number; y: number }[] | null = await findPath(
-      robot.position,
-      target
-    );
+    const path: Point[] | null = await findPath(robot.position, target);
     if (!path) {
       res.status(422).json({
         error:

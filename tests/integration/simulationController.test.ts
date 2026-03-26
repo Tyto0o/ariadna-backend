@@ -10,6 +10,13 @@ vi.mock('../../src/services/simulationEngine', () => ({
   SPEED_PX_PER_SEC: 50,
 }));
 
+vi.mock('../../src/utils/pathfinding', () => ({
+  addObstacleToCache: vi.fn(),
+  removeObstacleFromCache: vi.fn(),
+  updateObstacleInCache: vi.fn(),
+  findPath: vi.fn(),
+}));
+
 import app from '../../src/app';
 
 describe('POST /api/simulation', () => {

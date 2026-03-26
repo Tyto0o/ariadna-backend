@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+import type { IObstacle } from '../../src/types';
 
 const loadPathfinding = async () => {
   vi.resetModules();
@@ -8,7 +9,12 @@ const loadPathfinding = async () => {
     },
   }));
 
-  return import('../../src/utils/pathfinding');
+  const pathfinding = await import('../../src/utils/pathfinding');
+
+  // Allow import-time cache initialization to complete before mutating cache.
+  await new Promise<void>((resolve) => setTimeout(resolve, 0));
+
+  return pathfinding;
 };
 
 describe('pathfinding.findPath', () => {
@@ -25,12 +31,14 @@ describe('pathfinding.findPath', () => {
   it('returns null when the target area is fully blocked', async () => {
     const pathfinding = await loadPathfinding();
 
-    pathfinding.addObstacleToCache({
+    const wallObstacle = {
       name: 'wall',
       position: { x: 50, y: 50 },
       width: 2000,
       length: 2000,
-    } as never);
+    } as unknown as IObstacle;
+
+    pathfinding.addObstacleToCache(wallObstacle);
 
     const path = await pathfinding.findPath({ x: 0, y: 0 }, { x: 100, y: 100 });
 
@@ -46,12 +54,14 @@ describe('pathfinding.findPath', () => {
     );
     expect(baseline).not.toBeNull();
 
-    pathfinding.addObstacleToCache({
+    const middleObstacle = {
       name: 'middle-obstacle',
       position: { x: 50, y: 0 },
       width: 20,
       length: 20,
-    } as never);
+    } as unknown as IObstacle;
+
+    pathfinding.addObstacleToCache(middleObstacle);
 
     const rerouted = await pathfinding.findPath(
       { x: 0, y: 0 },

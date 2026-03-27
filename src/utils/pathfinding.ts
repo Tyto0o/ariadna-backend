@@ -1,17 +1,12 @@
 import Graph from 'node-dijkstra';
-import Obstacle from '../models/Obstacle';
 import type { IObstacle, Point } from '../types';
+import { getCachedObstacles, initializeObstacleCache } from './obstacleCache';
+import { getGraphCache, setGraphCache } from './graphCache';
 
 const GRID_STEP: number = 10; // The distance between nodes in the grid
 const OBSTACLE_SAFETY_BUFFER: number = 20; // Safety buffer around obstacles
 const WORKSPACE_MARGIN: number = 500; // Extra space around the furthest points to build the graph
 const COLLINEARITY_THRESHOLD: number = 0.01; // Threshold for determining collinearity
-
-let cachedGraph: Graph | null = null;
-let cachedMaxX: number = 0;
-let cachedMaxY: number = 0;
-let cachedObstaclesHash: string = '';
-let cachedObstacles: IObstacle[] = [];
 
 const isCollision = (x: number, y: number, obstacles: IObstacle[]): boolean => {
   return obstacles.some((obs) => {
@@ -108,50 +103,12 @@ const simplifyPath = (path: Point[]): Point[] => {
   return simplified;
 };
 
-const initializeObstacleCache = async (): Promise<void> => {
-  try {
-    cachedObstacles = await Obstacle.find();
-  } catch (error) {
-    console.error('Failed to initialize obstacle cache:', error);
-    cachedObstacles = [];
-  }
-};
-
-export const addObstacleToCache = (obstacle: IObstacle): void => {
-  cachedObstacles.push(obstacle);
-  cachedGraph = null;
-  cachedObstaclesHash = '';
-  cachedMaxX = 0;
-  cachedMaxY = 0;
-};
-
-export const removeObstacleFromCache = (obstacleId: string): void => {
-  cachedObstacles = cachedObstacles.filter(
-    (obs) => obs._id?.toString() !== obstacleId
-  );
-  cachedGraph = null;
-  cachedObstaclesHash = '';
-  cachedMaxX = 0;
-  cachedMaxY = 0;
-};
-
-export const updateObstacleInCache = (updatedObstacle: IObstacle): void => {
-  const index = cachedObstacles.findIndex(
-    (obs) => obs._id?.toString() === updatedObstacle._id?.toString()
-  );
-  if (index !== -1) {
-    cachedObstacles[index] = updatedObstacle;
-    cachedGraph = null;
-    cachedObstaclesHash = '';
-    cachedMaxX = 0;
-    cachedMaxY = 0;
-  }
-};
-
 export const findPath = async (
   start: Point,
   target: Point
 ): Promise<Point[] | null> => {
+  const obstacles: IObstacle[] = getCachedObstacles();
+
   const snappedStart: Point = {
     x: snapToGrid(start.x),
     y: snapToGrid(start.y),
@@ -165,17 +122,23 @@ export const findPath = async (
     Math.max(
       snappedStart.x,
       snappedTarget.x,
-      ...cachedObstacles.map((o) => o.position.x + o.width / 2)
+      ...obstacles.map((o) => o.position.x + o.width / 2)
     ) + WORKSPACE_MARGIN;
   const maxY: number =
     Math.max(
       snappedStart.y,
       snappedTarget.y,
-      ...cachedObstacles.map((o) => o.position.y + o.length / 2)
+      ...obstacles.map((o) => o.position.y + o.length / 2)
     ) + WORKSPACE_MARGIN;
 
   // Check if we can reuse cached graph
-  const obstaclesHash: string = JSON.stringify(cachedObstacles);
+  const obstaclesHash: string = JSON.stringify(obstacles);
+  const {
+    graph: cachedGraph,
+    maxX: cachedMaxX,
+    maxY: cachedMaxY,
+    obstaclesHash: cachedObstaclesHash,
+  } = getGraphCache();
   let graph: Graph;
 
   if (
@@ -186,11 +149,8 @@ export const findPath = async (
   ) {
     graph = cachedGraph;
   } else {
-    graph = buildGraph(maxX, maxY, cachedObstacles);
-    cachedGraph = graph;
-    cachedMaxX = maxX;
-    cachedMaxY = maxY;
-    cachedObstaclesHash = obstaclesHash;
+    graph = buildGraph(maxX, maxY, obstacles);
+    setGraphCache(graph, maxX, maxY, obstaclesHash);
   }
 
   const startId: string = `${snappedStart.x},${snappedStart.y}`;

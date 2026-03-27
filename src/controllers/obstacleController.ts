@@ -4,7 +4,7 @@ import {
   addObstacleToCache,
   removeObstacleFromCache,
   updateObstacleInCache,
-} from '../utils/pathfinding';
+} from '../utils/obstacleCache';
 
 export const getObstacles = async (
   req: Request,

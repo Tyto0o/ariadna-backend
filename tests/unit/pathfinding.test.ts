@@ -9,17 +9,23 @@ const loadPathfinding = async () => {
     },
   }));
 
-  const pathfinding = await import('../../src/utils/pathfinding');
+  const [pathfinding, obstacleCache] = await Promise.all([
+    import('../../src/utils/pathfinding'),
+    import('../../src/utils/obstacleCache'),
+  ]);
 
   // Allow import-time cache initialization to complete before mutating cache.
   await new Promise<void>((resolve) => setTimeout(resolve, 0));
 
-  return pathfinding;
+  return {
+    pathfinding,
+    addObstacleToCache: obstacleCache.addObstacleToCache,
+  };
 };
 
 describe('pathfinding.findPath', () => {
   it('returns a valid path for reachable points', async () => {
-    const pathfinding = await loadPathfinding();
+    const { pathfinding } = await loadPathfinding();
 
     const path = await pathfinding.findPath({ x: 0, y: 0 }, { x: 100, y: 100 });
 
@@ -29,7 +35,7 @@ describe('pathfinding.findPath', () => {
   });
 
   it('returns null when the target area is fully blocked', async () => {
-    const pathfinding = await loadPathfinding();
+    const { pathfinding, addObstacleToCache } = await loadPathfinding();
 
     const wallObstacle = {
       name: 'wall',
@@ -38,7 +44,7 @@ describe('pathfinding.findPath', () => {
       length: 2000,
     } as unknown as IObstacle;
 
-    pathfinding.addObstacleToCache(wallObstacle);
+    addObstacleToCache(wallObstacle);
 
     const path = await pathfinding.findPath({ x: 0, y: 0 }, { x: 100, y: 100 });
 
@@ -46,7 +52,7 @@ describe('pathfinding.findPath', () => {
   });
 
   it('changes route when an obstacle is added to cache', async () => {
-    const pathfinding = await loadPathfinding();
+    const { pathfinding, addObstacleToCache } = await loadPathfinding();
 
     const baseline = await pathfinding.findPath(
       { x: 0, y: 0 },
@@ -61,7 +67,7 @@ describe('pathfinding.findPath', () => {
       length: 20,
     } as unknown as IObstacle;
 
-    pathfinding.addObstacleToCache(middleObstacle);
+    addObstacleToCache(middleObstacle);
 
     const rerouted = await pathfinding.findPath(
       { x: 0, y: 0 },

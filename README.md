@@ -25,6 +25,18 @@ Ariadna 3D Backend is a high-performance computational engine designed for auton
 
 The system implements Dijkstra's algorithm for guaranteed shortest-path routing while maintaining persistent spatial data for dynamic warehouse environments.
 
+## 🔗 Project Scope
+
+This repository contains the backend part of the Ariadna project.
+
+Frontend repository:
+[Ariadna Web App](https://github.com/Tyto0o/ariadna-web-app)
+
+Application demo video:
+[Watch on YouTube](https://youtu.be/2recnEP32AI)
+
+[![Ariadna App Demo](https://img.youtube.com/vi/2recnEP32AI/hqdefault.jpg)](https://youtu.be/2recnEP32AI)
+
 ## 🧠 Key Features
 
 - **Pathfinding Engine**: Implementation of Dijkstra's Algorithm to guarantee the shortest path between the robot's current position and the destination in a weighted graph environment.
